@@ -18,7 +18,6 @@
 #include <QStatusBar>         // Status bar at the bottom of the window
 #include <QMessageBox>        // For displaying messages/errors
 #include <QScrollBar>         // For accessing the scrollbar of the text area
-
 // Forward declaration of UI elements to avoid including their headers in the .h if only pointers are needed
 // However, for direct member objects, includes are necessary as above.
 
