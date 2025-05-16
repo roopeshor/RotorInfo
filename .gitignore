@@ -3,3 +3,4 @@ build
 .qmake*
 .vscode
 obj-*
+debian/.debhelper
