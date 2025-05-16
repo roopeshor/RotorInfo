@@ -37,6 +37,8 @@ private:
   Ui::MainWindow* ui; // Pointer to the generated UI object
   QSerialPort* serialPort;
   bool isConnected;
+
+	QString serialLine;
 };
 
 #endif // MAINWINDOW_H
