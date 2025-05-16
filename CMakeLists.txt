@@ -7,10 +7,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets SerialPort)
 qt_standard_project_setup()
+
+file(GLOB UI_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.ui")
+qt6_wrap_ui(UI_HEADERS ${UI_FILES})
+
 qt_add_executable(rotorinfo
 	src/mainwindow.h
 	src/mainwindow.cpp
 	src/main.cpp
+	${UI_HEADERS}
 )
 
 target_link_libraries(rotorinfo PRIVATE Qt6::Widgets Qt6::SerialPort)

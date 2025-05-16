@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>600</width>
+    <height>400</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Serial Port Reader</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="mainLayout">
+    <item>
+     <layout class="QHBoxLayout" name="controlsLayout">
+      <item>
+       <widget class="QLabel" name="portLabel">
+        <property name="text">
+         <string>Port:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="serialPortComboBox"/>
+      </item>
+      <item>
+       <widget class="QLabel" name="baudRateLabel">
+        <property name="text">
+         <string>Baud Rate:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="baudRateComboBox"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="refreshPortsButton">
+        <property name="text">
+         <string>Refresh Ports</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="connectButton">
+        <property name="text">
+         <string>Connect</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="infoLayout">
+      <item>
+       <layout class="QVBoxLayout" name="R1Layout">
+        <item>
+         <widget class="QLabel" name="R1degLabel">
+          <property name="text">
+           <string>+12</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="R1rpmLabel">
+          <property name="text">
+           <string>12 rmp</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="R2Layout">
+        <item>
+         <widget class="QLabel" name="R2degLabel">
+          <property name="text">
+           <string>132</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="R2rpmLabel">
+          <property name="text">
+           <string>10 rmp</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
