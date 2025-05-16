@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h" // Include the generated UI header
+#include "../build/ui_mainwindow.h" // Include the generated UI header
 #include <QDebug>
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow), isConnected(false) {
