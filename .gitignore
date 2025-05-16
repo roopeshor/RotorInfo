@@ -5,3 +5,4 @@ build
 obj-*
 debian/.debhelper
 src/ui_*
+*.csv

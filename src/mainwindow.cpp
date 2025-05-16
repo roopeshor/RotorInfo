@@ -150,17 +150,20 @@ void MainWindow::extractData(QString serialData) {
 		// deg = std::fmod(deg, 360.0);
 		rpm1 = double(pulseCount1 - lastPulseCount1) /
 			(double(timeStamp - lastTimeFrame) / 1000.0) * 1000.0 / ppr * 60.0;
-		lastPulseCount1 = pulseCount1;
-
-		/////// 2 ////////
-		pulseCount2 = rotor2.at(1).toLong();
-		deg2 = (pulseCount2 / ppr * 360);
-		rpm2 = double(pulseCount2 - lastPulseCount2) /
+			
+			/////// 2 ////////
+			pulseCount2 = rotor2.at(1).toLong();
+			deg2 = (pulseCount2 / ppr * 360);
+			rpm2 = double(pulseCount2 - lastPulseCount2) /
 			(double(timeStamp - lastTimeFrame) / 2000.0) * 1000.0 / ppr * 60.0;
+		if(doRecord && (lastPulseCount1 != pulseCount1 || lastPulseCount2 != pulseCount2)) {
+			QString data = QString("%1,%2,%3,%4,%5").arg(timeStamp / 1000000).arg(deg1).arg(deg2).arg(rpm1).arg(rpm2);
+			recordToLogFile(data);
+		}
+		lastPulseCount1 = pulseCount1;
 		lastPulseCount2 = pulseCount2;
 
 		lastTimeFrame = timeStamp;
-
 		ui->R1degLabel->setText(QString::number(deg1, 'f', 2) + "°");
 		ui->R1rpmLabel->setText(QString::number(rpm1, 'f', 1) + " rpm");
 		ui->R2degLabel->setText(QString::number(deg2, 'f', 2) + "°");
@@ -173,13 +176,46 @@ void MainWindow::extractData(QString serialData) {
 	}
 }
 
+void MainWindow::recordToLogFile(const QString& data) {
+	if (logFile.isOpen()) {
+		logStream << data << Qt::endl;
+	} else {
+		qDebug() << "File not open:" << logPath;
+	}
+}
+
 void MainWindow::changeRecordingMode() {
 	doRecord = !doRecord;
+	if (doRecord) {
+		logPath = ui->csvLocation->text();
+
+
+		if (logPath.length() > 0) {
+			ui->csvLocation->setEnabled(false);
+			ui->recordButton->setText("Stop Recording");
+
+			if (logFile.isOpen()) logFile.close();
+			logFile.setFileName(logPath);
+			bool writeHeader = !logFile.exists();
+			logFile.open(QIODevice::Append | QIODevice::Text);
+			logStream.setDevice(&logFile);
+
+			if (writeHeader) logStream << "time (s),Deg 1,Deg 2,RPM 1,RPM 2" << Qt::endl;
+		} else {
+			doRecord = false;
+		}
+	} else {
+		if (logFile.isOpen()) logFile.close();
+		ui->csvLocation->setEnabled(true);
+		ui->recordButton->setText("Start Recording");
+	}
 }
+
 void MainWindow::onpprChanged() {
 	ppr = ui->ppr->value();
 	ui->statusBar->showMessage(QString("Changed ppr to %1").arg(ppr));
 }
+
 void MainWindow::handleSerialError(QSerialPort::SerialPortError error) {
 	if (error != QSerialPort::NoError) {
 		QString errorMsg = serialPort->errorString();

@@ -11,7 +11,8 @@
 #include <QSerialPortInfo>
 #include <QMessageBox>
 #include <QTimer>
-
+#include <QFile>
+#include <QTextStream>
 
 // Forward declaration of the generated UI class
 namespace Ui {
@@ -31,10 +32,11 @@ private slots:
   void onpprChanged();
   void readSerialData();
   void changeRecordingMode();
-  void extractData(QString serialData);
   void handleSerialError(QSerialPort::SerialPortError error);
-
-private:
+	
+	private:
+  void recordToLogFile(const QString& data);
+  void extractData(QString serialData);
   void populateSerialPorts();
   void populateBaudRates();
   void setUiControlsEnabled(bool enabled);
@@ -55,6 +57,9 @@ private:
 	long lastPulseCount1 = 0;
 	long lastPulseCount2 = 0;
 	bool doRecord = false;
+	QString logPath = "data.csv";
+	QFile logFile;
+	QTextStream logStream;
 };
 
 #endif // MAINWINDOW_H
