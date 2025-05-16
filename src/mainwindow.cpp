@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "../build/ui_mainwindow.h" // Include the generated UI header
-#include <QDebug>
+// #include <QDebug>
+// #include <cmath>
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow), isConnected(false) {
 	ui->setupUi(this); // Initialize the UI from the .ui file
@@ -12,10 +13,15 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	connect(ui->connectButton, &QPushButton::clicked, this, &MainWindow::onConnectButtonClicked);
 	connect(ui->refreshPortsButton, &QPushButton::clicked, this, &MainWindow::onRefreshPortsButtonClicked);
+	connect(ui->recordButton, &QPushButton::clicked, this, &MainWindow::changeRecordingMode);
+	connect(ui->ppr, &QSpinBox::textChanged, this, &MainWindow::onpprChanged);
 	connect(serialPort, &QSerialPort::readyRead, this, &MainWindow::readSerialData);
 	connect(serialPort, SIGNAL(errorOccurred(QSerialPort::SerialPortError)), this, SLOT(handleSerialError(QSerialPort::SerialPortError)));
+	ui->ppr->setMinimum(0);
+	ui->ppr->setValue(1000);
+	ui->ppr->setButtonSymbols(QAbstractSpinBox::NoButtons);
 
-	ui->statusbar->showMessage("Disconnected");
+	ui->statusBar->showMessage("Disconnected");
 }
 
 MainWindow::~MainWindow() {
@@ -65,7 +71,7 @@ void MainWindow::populateBaudRates() {
 
 void MainWindow::onRefreshPortsButtonClicked() {
 	populateSerialPorts();
-	ui->statusbar->showMessage("Ports refreshed.");
+	ui->statusBar->showMessage("Ports refreshed.");
 }
 
 void MainWindow::onConnectButtonClicked() {
@@ -92,7 +98,7 @@ void MainWindow::onConnectButtonClicked() {
 		if (serialPort->open(QIODevice::ReadOnly)) {
 			isConnected = true;
 			ui->connectButton->setText("Disconnect");
-			ui->statusbar->showMessage(
+			ui->statusBar->showMessage(
 				QString("Connected to %1 at %2 baud")
 				.arg(portName)
 				.arg(QString::number(baudRate))
@@ -104,13 +110,13 @@ void MainWindow::onConnectButtonClicked() {
 				"Connection Error",
 				"Failed to open port: " + serialPort->errorString()
 			);
-			ui->statusbar->showMessage("Connection failed: " + serialPort->errorString());
+			ui->statusBar->showMessage("Connection failed: " + serialPort->errorString());
 		}
 	} else {
 		serialPort->close();
 		isConnected = false;
 		ui->connectButton->setText("Connect");
-		ui->statusbar->showMessage("Disconnected");
+		ui->statusBar->showMessage("Disconnected");
 		setUiControlsEnabled(true);
 	}
 }
@@ -119,11 +125,60 @@ void MainWindow::readSerialData() {
 	QByteArray data = serialPort->readAll();
 	QString line = QString::fromUtf8(data);
 	if (line == "\n") {
-		ui->R1degLabel->setText(serialLine);
+		this->extractData(serialLine);
 		serialLine.clear();
 	} else if (line != "\r") {
 		serialLine.append(data);
 	}
+}
+
+/**
+ * Serial structure:
+ * <long timeStamp>|<state> <pulse>|<state> <pulse>\r\n
+ */
+void MainWindow::extractData(QString serialData) {
+	QStringList datas = serialData.split("|");
+	if (datas.length() == 3) {
+		long timeStamp = datas.at(0).toLong();
+		QStringList rotor1 = datas.at(1).split(" ");
+		QStringList rotor2 = datas.at(2).split(" ");
+
+		/////// 1 ////////
+		// QChar status = rotor1.at(0)[0];
+		pulseCount1 = rotor1.at(1).toLong();
+		deg1 = (pulseCount1 / ppr * 360);
+		// deg = std::fmod(deg, 360.0);
+		rpm1 = double(pulseCount1 - lastPulseCount1) /
+			(double(timeStamp - lastTimeFrame) / 1000.0) * 1000.0 / ppr * 60.0;
+		lastPulseCount1 = pulseCount1;
+
+		/////// 2 ////////
+		pulseCount2 = rotor2.at(1).toLong();
+		deg2 = (pulseCount2 / ppr * 360);
+		rpm2 = double(pulseCount2 - lastPulseCount2) /
+			(double(timeStamp - lastTimeFrame) / 2000.0) * 1000.0 / ppr * 60.0;
+		lastPulseCount2 = pulseCount2;
+
+		lastTimeFrame = timeStamp;
+
+		ui->R1degLabel->setText(QString::number(deg1, 'f', 2) + "°");
+		ui->R1rpmLabel->setText(QString::number(rpm1, 'f', 1) + " rpm");
+		ui->R2degLabel->setText(QString::number(deg2, 'f', 2) + "°");
+		ui->R2rpmLabel->setText(QString::number(rpm2, 'f', 1) + " rpm");
+
+	} else {
+		ui->statusBar->showMessage(QString("Failed to extract"));
+		QTimer::singleShot(1000, [&]() {ui->statusBar->showMessage("");});
+
+	}
+}
+
+void MainWindow::changeRecordingMode() {
+	doRecord = !doRecord;
+}
+void MainWindow::onpprChanged() {
+	ppr = ui->ppr->value();
+	ui->statusBar->showMessage(QString("Changed ppr to %1").arg(ppr));
 }
 void MainWindow::handleSerialError(QSerialPort::SerialPortError error) {
 	if (error != QSerialPort::NoError) {
@@ -132,14 +187,14 @@ void MainWindow::handleSerialError(QSerialPort::SerialPortError error) {
 			serialPort->close();
 			isConnected = false;
 			ui->connectButton->setText("Connect");
-			ui->statusbar->showMessage("Disconnected (Error: Resource unavailable)");
+			ui->statusBar->showMessage("Disconnected (Error: Resource unavailable)");
 			setUiControlsEnabled(true);
 			QMessageBox::warning(this, "Serial Port Error", "Device may have been disconnected.");
 		} else if (isConnected && error != QSerialPort::NoError) {
-			ui->statusbar->showMessage("Error: " + errorMsg);
+			ui->statusBar->showMessage("Error: " + errorMsg);
 			QMessageBox::warning(this, "Serial Port Error", errorMsg);
 		} else if (error != QSerialPort::NoError) {
-			ui->statusbar->showMessage("Serial Port Error: " + errorMsg);
+			ui->statusBar->showMessage("Serial Port Error: " + errorMsg);
 			QMessageBox::information(this, "Serial Port Info", "Serial Port Event: " + errorMsg);
 		}
 	}
