@@ -3,7 +3,7 @@ Maintainer: Roopesh O R<roopeshor3@gmail.com>
 Section: misc
 Priority: optional
 Standards-Version: 4.7.0
-Build-Depends: debhelper-compat (= 13), qt6-base-dev (>=6.8.2), qt6-serialport-dev (>=6.8.2)
+Build-Depends: debhelper-compat (= 13), qt6-base-dev (>=6.8.2), qt6-base-dev-tools (>= 6.8.2), qt6-serialport-dev (>=6.8.2), qt6-tools-dev (>=6.8.2), qt6-tools-dev-tools (>=6.8.2), cmake (>= 3.31.6), 
 
 Package: rotorinfo
 Architecture: any
