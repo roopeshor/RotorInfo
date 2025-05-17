@@ -12,7 +12,7 @@ cd RotorInfo
 ### On windows
 ```bash
 cmake -S . -B build -G "Visual Studio 17 2022"
-cmake --build build
+cmake --build build --config Release
 .\build\win\rotorinfo.exe
 ```
 
@@ -22,3 +22,12 @@ cmake -S . -B build
 make -C build -j12
 ./build/linux/rotorinfo
 ```
+
+# Deploying
+Add all required `dll` files to `build/win` directory with [windeployqt](https://doc.qt.io/qt-6/windows-deployment.html):
+```bash
+cd build/win
+windeployqt --no-translations rotorinfo.exe
+```
+
+the `build/win` directory can be compressed and shared to other systems.
