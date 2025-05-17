@@ -1,6 +1,6 @@
 # Rotor Speed
-
-Reads serial data from arduino and displays it, does stuff with it.
+An arduino collects data from Rotary encoder and sends pulse count and timestamp to serial output.
+This application reads that serial data, extracts pulse count and displays information about rotation of both rotors. Optionally it can log data in csv file.
 
 # Build and run
 ## 1. Get source
