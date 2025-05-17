@@ -157,7 +157,7 @@ void MainWindow::extractData(QString serialData) {
 			rpm2 = double(pulseCount2 - lastPulseCount2) /
 			(double(timeStamp - lastTimeFrame) / 2000.0) * 1000.0 / ppr * 60.0;
 		if(doRecord && (lastPulseCount1 != pulseCount1 || lastPulseCount2 != pulseCount2)) {
-			QString data = QString("%1,%2,%3,%4,%5").arg(timeStamp / 1000000).arg(deg1).arg(deg2).arg(rpm1).arg(rpm2);
+			QString data = QString("%1,%2,%3,%4,%5").arg((double) timeStamp / 1000000).arg(deg1).arg(deg2).arg(rpm1).arg(rpm2);
 			recordToLogFile(data);
 		}
 		lastPulseCount1 = pulseCount1;
